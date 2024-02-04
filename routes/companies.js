@@ -1,5 +1,6 @@
 
 const express = require('express');
+const slugify=require('slugify');
 const router = new express.Router();
 
 const db = require("../db"); 
@@ -25,16 +26,21 @@ router.get('/:code', async function(req,res, next){
     try{
         console.log('Request reached /companies/:code route');
 
-        const results = await db.query(
-            'SELECT code, name, description, invoices FROM companies WHERE code = $1',[req.params.code]);
+        const companyResults = await db.query(
+            'SELECT c.code, c.name, c.description, c.industry_id, i.industry FROM companies AS c JOIN industries AS i ON c.industry_id = i.code WHERE c.code = $1',[req.params.code]);
 
-        if (results.rows.length !== 0){
-            return res.json({'companies':results.rows});
+        const invoiceResults = await db.query('SELECT id FROM invoices WHERE comp_code = $1',[req.params.code])
 
-        } else {
+        if (companyResults.rows.length === 0){
             let notFoundError = new ExpressError('Company Not Found', 404)
             throw notFoundError
-        }
+
+        } else {let company = companyResults.rows[0];
+            let invoices = invoiceResults.rows;
+    
+            company.invoices = invoices.map(inv => inv.id);
+            return res.json({'companies': company})}
+        
     } catch (e){
         return next(e)
     }
@@ -44,13 +50,14 @@ router.post('/', async function(req,res, next){
     try{
 
         console.log('Request reached companies post route');
-        let { code, name, description } = req.body;
-
+        let { name, description } = req.body;
+        let code = slugify(name,{lower: true})
 
         const results = await db.query(
             'INSERT INTO companies (code, name, description) VALUES ($1,$2,$3) RETURNING code, name, description',[code, name, description]);
         
-        return res.json({companies:results.rows});
+        
+        return res.json({'companies':results.rows});
 
     } catch (e){
         return next(e)
@@ -120,3 +127,4 @@ router.delete('/:code', async function(req,res, next){
 })
 
 module.exports = router;
+
