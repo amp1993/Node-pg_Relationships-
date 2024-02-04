@@ -5,7 +5,7 @@ const slugify = require('slugify');
 const router = new express.Router();
 const db = require("../db");
 const ExpressError = require("../expressError");
-const { set } = require('../app');
+const app = require('../app');
 
 
 //Get all invoices
@@ -28,7 +28,7 @@ router.get('/:id', async function (req, res, next) {
         console.log('Request reached /invoices/:id route');
 
         const results = await db.query(
-            'SELECT i.id, i.comp_code, i.amt,i.paid, i.add_date, i.paid_date, c.name, c.description FROM invoices AS i JOIN companies AS c ON i.comp_code = c.code WHERE i.id = $1', [req.params.id]);
+            'SELECT i.id, i.comp_code, i.amt,i.paid, i.add_date, i.paid_date, c.name FROM invoices AS i JOIN companies AS c ON i.comp_code = c.code WHERE i.id = $1', [req.params.id]);
 
         if (results.rows.length !== 0) {
             return res.json({ 'invoice': results.rows });

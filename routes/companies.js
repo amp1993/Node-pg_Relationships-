@@ -50,36 +50,21 @@ router.post('/', async function(req,res, next){
     try{
 
         console.log('Request reached companies post route');
-        let { name, description } = req.body;
+        let { name, description, industry_id } = req.body;
         let code = slugify(name,{lower: true})
 
         const results = await db.query(
-            'INSERT INTO companies (code, name, description) VALUES ($1,$2,$3) RETURNING code, name, description',[code, name, description]);
+            'INSERT INTO companies (code, name, description, industry_id) VALUES ($1,$2,$3,$4) RETURNING code, name, description, industry_id',[code, name, description, industry_id]);
         
         
-        return res.json({'companies':results.rows});
+        return res.json({'companies':results.rows[0]});
 
     } catch (e){
         return next(e)
     }
 })
 
-router.post('/', async function(req,res, next){
-    try{
 
-        console.log('Request reached companies post route');
-        let { code, name, description } = req.body;
-
-
-        const results = await db.query(
-            'INSERT INTO companies (code, name, description) VALUES ($1,$2,$3) RETURNING code, name, description',[code, name, description]);
-        
-        return res.json({companies:results.rows});
-
-    } catch (e){
-        return next(e)
-    }
-})
 
 router.put('/:code', async function(req,res, next){
     try{
