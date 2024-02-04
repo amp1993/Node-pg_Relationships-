@@ -2,9 +2,10 @@
 
 
 const express = require("express");
-const ExpressError = require("./expressError")
+const ExpressError = require("./expressError");
 const companyRoutes = require("./routes/companies");
-const invoicesRoutes = require('./routes/invoices')
+const invoicesRoutes = require('./routes/invoices');
+const industryRoutes = require('./routes/industries')
 
 
 const app = express();
@@ -19,6 +20,10 @@ console.log('Company routes mounted');
 
 app.use('/invoices', invoicesRoutes)
 console.log('Invoice route mounted')
+
+app.use('/industries', industryRoutes)
+console.log('industry route mounted')
+
 
 
 
